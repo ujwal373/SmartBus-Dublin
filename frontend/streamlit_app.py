@@ -1,0 +1,24 @@
+import streamlit as st
+import requests
+import folium
+from streamlit_folium import st_folium
+
+st.title("🚍 SmartBus Dublin – Live Map")
+
+resp = requests.get("http://127.0.0.1:8000/buses")
+data = resp.json()
+
+m = folium.Map(location=[53.35, -6.26], zoom_start=12)
+
+if "entity" in data:
+    for ent in data["entity"]:
+        if "vehicle" in ent:
+            v = ent["vehicle"]
+            pos = v["position"]
+            folium.CircleMarker(
+                location=[pos["latitude"], pos["longitude"]],
+                radius=4, color="blue",
+                popup=v["trip"].get("route_id", "Unknown")
+            ).add_to(m)
+
+st_folium(m, width=700, height=500)
