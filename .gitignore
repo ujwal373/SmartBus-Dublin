@@ -1,0 +1,8 @@
+# Ignore environment and cache
+.env
+__pycache__/
+.streamlit/
+*.pyc
+.DS_Store
+.idea/
+.vscode/
