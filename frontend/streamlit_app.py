@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import folium
 from streamlit_folium import st_folium
+import pandas as pd
+from delay_analyzer import detect_delays
 
 st.title("🚍 SmartBus Dublin – Live Map")
 
@@ -22,3 +24,10 @@ if "entity" in data:
             ).add_to(m)
 
 st_folium(m, width=700, height=500)
+
+# fetch bus data as before
+data = requests.get("http://127.0.0.1:8000/buses").json()
+df = detect_delays(data)
+
+st.subheader("🚦 Delay Detection Snapshot")
+st.dataframe(df.head())
