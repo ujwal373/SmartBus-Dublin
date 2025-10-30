@@ -2,8 +2,11 @@ import streamlit as st
 import requests
 import folium
 from streamlit_folium import st_folium
-import pandas as pd
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
+
 from delay_analyzer import detect_delays
+
 
 st.title("🚍 SmartBus Dublin – Live Map")
 
