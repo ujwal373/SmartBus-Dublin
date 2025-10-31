@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "b
 from delay_analyzer import detect_delays
 
 
+
 st.title("🚍 SmartBus Dublin – Live Map")
 
 resp = requests.get("http://127.0.0.1:8000/buses")
