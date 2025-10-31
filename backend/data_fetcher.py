@@ -1,6 +1,7 @@
 import os
 import httpx
 from dotenv import load_dotenv
+from google.transit import gtfs_realtime_pb2
 
 load_dotenv()
 
