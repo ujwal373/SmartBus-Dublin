@@ -40,3 +40,23 @@ async def fetch_gtfs():
             return {"entity": entities, "count": len(entities)}
         else:
             return {"error": f"GTFS fetch failed ({r.status_code})"}
+
+async def fetch_weather():
+    """
+    Fetch current weather data for Dublin from Met Éireann (public endpoint).
+    """
+    url = "https://prodapi.metweb.ie/observations/dublin"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        r = await client.get(url)
+        if r.status_code == 200:
+            data = r.json()
+            latest = data["observations"][-1] if "observations" in data else {}
+            return {
+                "temp": latest.get("airTemperature"),
+                "windSpeed": latest.get("windSpeed"),
+                "rainfall": latest.get("rainfall"),
+                "timestamp": latest.get("time")
+            }
+        else:
+            return {"error": f"Weather fetch failed ({r.status_code})"}
+
