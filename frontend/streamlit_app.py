@@ -6,6 +6,8 @@ import sys, os, time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend")))
 from delay_analyzer import detect_delays
 
+st_autorefresh(interval=60000, key="refresh")
+
 st.set_page_config(page_title="SmartBus Dublin", page_icon="🚍", layout="wide")
 
 st.title("🚍 SmartBus Dublin – Live Map")
