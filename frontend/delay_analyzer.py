@@ -1,36 +1,53 @@
 import pandas as pd
 import time
 
-def detect_delays(data, cache={}):
+# Simple cache to remember last frame
+cache = {"prev": None, "time": 0}
+
+def detect_delays(data):
     """
-    Detect buses that are likely delayed based on reduced speed or
-    repeated positions.
+    Detect potential bus delays by comparing current vs previous positions.
+    Returns a DataFrame of slow or stopped vehicles.
     """
-    if "entity" not in data:
+    # Convert incoming JSON to DataFrame
+    if not data or "entity" not in data:
         return pd.DataFrame()
 
-    records = []
-    now = time.time()
+    df = pd.json_normalize(data["entity"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s", errors="coerce")
 
-    for ent in data["entity"]:
-        v = ent.get("vehicle", {})
-        pos = v.get("position", {})
-        trip = v.get("trip", {})
-        if pos and trip:
-            records.append({
-                "route": trip.get("route_id"),
-                "lat": pos.get("latitude"),
-                "lon": pos.get("longitude"),
-                "timestamp": now,
-                "vehicle_id": v.get("vehicle", {}).get("id", ent.get("id"))
-            })
+    # Rename id column for clarity
+    if "id" in df.columns:
+        df.rename(columns={"id": "vehicle_id"}, inplace=True)
 
-    df = pd.DataFrame(records)
+    # If first run, just cache and return empty
+    if cache["prev"] is None:
+        cache["prev"] = df.copy()
+        cache["time"] = time.time()
+        return pd.DataFrame()
 
-    # Basic heuristic: repeated identical coordinates over 2+ snapshots → possible delay
-    if "prev" in cache:
-        merged = df.merge(cache["prev"], on="id", suffixes=("", "_prev"))
-        df["stopped"] = ((merged["lat"] - merged["lat_prev"]).abs() < 0.0001) & \
-                        ((merged["lon"] - merged["lon_prev"]).abs() < 0.0001)
+    # Ensure both have the same merge key
+    if "vehicle_id" not in cache["prev"].columns:
+        cache["prev"].rename(columns={"id": "vehicle_id"}, inplace=True)
+
+    try:
+        merged = df.merge(cache["prev"], on="vehicle_id", suffixes=("", "_prev"))
+    except KeyError:
+        # If columns still mismatch, reset cache and skip this round
+        cache["prev"] = df.copy()
+        return pd.DataFrame()
+
+    # Compute distance moved (very rough proxy for delay)
+    merged["moved"] = (
+        (merged["position.latitude"] - merged["position.latitude_prev"]).abs() +
+        (merged["position.longitude"] - merged["position.longitude_prev"]).abs()
+    )
+
+    delayed = merged[merged["moved"] < 0.0001]  # adjust threshold
+    delayed = delayed[["vehicle_id", "trip.route_id", "moved", "timestamp"]]
+
+    # Update cache
     cache["prev"] = df.copy()
-    return df
+    cache["time"] = time.time()
+
+    return delayed
