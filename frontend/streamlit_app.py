@@ -1,17 +1,22 @@
 import streamlit as st
+from streamlit.experimental_rerun import rerun  # not needed, but safe for future
+from streamlit_autorefresh import st_autorefresh  # ✅ fix for NameError
 import requests
 import folium
 from streamlit_folium import st_folium
 import sys, os, time
+
+# Local import for delay analyzer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend")))
 from delay_analyzer import detect_delays
 
-st_autorefresh(interval=60000, key="refresh")
-
+# ---- Basic setup ----
 st.set_page_config(page_title="SmartBus Dublin", page_icon="🚍", layout="wide")
-
 st.title("🚍 SmartBus Dublin – Live Map")
 st.caption("AI-assisted monitoring for a self-healing Dublin bus network")
+
+# ---- Auto-refresh every 60 seconds ----
+st_autorefresh(interval=60000, key="refresh")
 
 # ---- Fetch bus data safely ----
 try:
@@ -24,7 +29,7 @@ except Exception as e:
     st.error(f"❌ Cannot connect to backend: {e}")
     st.stop()
 
-# ---- Detect delays ----
+# ---- Delay detection ----
 df = detect_delays(data)
 count = len(data.get("entity", []))
 
@@ -33,8 +38,8 @@ st.markdown(
     f"**Last update:** {time.strftime('%H:%M:%S')}  |  🚌 Active vehicles: {count}  |  ⚠️ Detected delays: {len(df)}"
 )
 
-# ---- Base map ----
-m = folium.Map(location=[53.3498, -6.2603], zoom_start=9, tiles="CartoDB positron")
+# ---- Map setup ----
+m = folium.Map(location=[53.3498, -6.2603], zoom_start=12, tiles="CartoDB positron")
 
 if "entity" in data and count > 0:
     for ent in data["entity"]:
@@ -45,7 +50,7 @@ if "entity" in data and count > 0:
 
         folium.CircleMarker(
             location=[lat, lon],
-            radius=4,
+            radius=5,
             color="blue",
             fill=True,
             fill_opacity=0.7,
