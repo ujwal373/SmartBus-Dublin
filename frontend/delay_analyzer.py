@@ -29,7 +29,7 @@ def detect_delays(data, cache={}):
 
     # Basic heuristic: repeated identical coordinates over 2+ snapshots → possible delay
     if "prev" in cache:
-        merged = df.merge(cache["prev"], on="vehicle_id", suffixes=("", "_prev"))
+        merged = df.merge(cache["prev"], on="id", suffixes=("", "_prev"))
         df["stopped"] = ((merged["lat"] - merged["lat_prev"]).abs() < 0.0001) & \
                         ((merged["lon"] - merged["lon_prev"]).abs() < 0.0001)
     cache["prev"] = df.copy()
