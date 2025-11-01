@@ -1,17 +1,20 @@
 import os
 import httpx
+import time
 from dotenv import load_dotenv
 load_dotenv()
 
-_last_fetch = {"data": None, "time": 0}
+_cache = {"data": None, "time": 0}
 
 async def fetch_gtfs():
-    """
-    Fetch live Dublin Bus vehicle data from NTA GTFS Realtime (v2 JSON feed)
-    """
     url = os.getenv("GTFS_RT_URL")
     api_key = os.getenv("API_KEY")
     headers = {"x-api-key": api_key}
+
+    # if cached data < 60 sec old → reuse it
+    now = time.time()
+    if _cache["data"] and now - _cache["time"] < 60:
+        return _cache["data"]
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         r = await client.get(url, headers=headers)
@@ -37,7 +40,9 @@ async def fetch_gtfs():
                     "vehicle_id": v.get("vehicle", {}).get("id"),
                     "timestamp": v.get("timestamp")
                 })
-            return {"entity": entities, "count": len(entities)}
+            data = {"entity": entities, "count": len(entities)}
+            _cache.update({"data": data, "time": now})
+            return data
         else:
             return {"error": f"GTFS fetch failed ({r.status_code})"}
 
