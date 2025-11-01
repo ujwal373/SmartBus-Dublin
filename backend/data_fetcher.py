@@ -42,6 +42,10 @@ async def fetch_gtfs():
         else:
             return {"error": f"GTFS fetch failed ({r.status_code})"}
 
+if _last_fetch["data"] and (now - _last_fetch["time"] < 60):
+    return _last_fetch["data"]
+
+
 async def fetch_weather():
     """
     Fetch current weather data for Dublin from Met Éireann (public endpoint).
