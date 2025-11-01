@@ -1,16 +1,15 @@
 import streamlit as st
-from streamlit.experimental_rerun import rerun  # not needed, but safe for future
-from streamlit_autorefresh import st_autorefresh  # ✅ fix for NameError
+from streamlit_autorefresh import st_autorefresh  # ✅ install with: pip install streamlit-autorefresh
 import requests
 import folium
 from streamlit_folium import st_folium
 import sys, os, time
 
-# Local import for delay analyzer
+# Import the delay analyzer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend")))
 from delay_analyzer import detect_delays
 
-# ---- Basic setup ----
+# ---- Streamlit page setup ----
 st.set_page_config(page_title="SmartBus Dublin", page_icon="🚍", layout="wide")
 st.title("🚍 SmartBus Dublin – Live Map")
 st.caption("AI-assisted monitoring for a self-healing Dublin bus network")
@@ -29,7 +28,7 @@ except Exception as e:
     st.error(f"❌ Cannot connect to backend: {e}")
     st.stop()
 
-# ---- Delay detection ----
+# ---- Detect delays ----
 df = detect_delays(data)
 count = len(data.get("entity", []))
 
@@ -38,7 +37,7 @@ st.markdown(
     f"**Last update:** {time.strftime('%H:%M:%S')}  |  🚌 Active vehicles: {count}  |  ⚠️ Detected delays: {len(df)}"
 )
 
-# ---- Map setup ----
+# ---- Base Map ----
 m = folium.Map(location=[53.3498, -6.2603], zoom_start=12, tiles="CartoDB positron")
 
 if "entity" in data and count > 0:
