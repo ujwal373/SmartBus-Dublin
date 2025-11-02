@@ -47,14 +47,18 @@ if "entity" in data and count > 0:
         lat, lon = pos["latitude"], pos["longitude"]
         route_id = trip.get("route_id", "Unknown")
 
+        # ✅ Colour logic
+        color = "blue" if route_id.startswith("4820") else "gray"
+
         folium.CircleMarker(
             location=[lat, lon],
-            radius=5,
-            color="blue",
+            radius=4,
+            color=color,
             fill=True,
             fill_opacity=0.7,
             popup=f"Route: {route_id}"
         ).add_to(m)
+
 else:
     st.warning("No live vehicles available right now.")
 
