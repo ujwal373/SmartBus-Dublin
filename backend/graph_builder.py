@@ -2,6 +2,19 @@ import os
 import city2graph.gtfs as gtfs
 import networkx as nx
 
+from gtfs_loader import load_gtfs_as_graph
+import networkx as nx
+
+def build_dublin_bus_graph():
+    gtfs_path = "../data/gtfs_dublin.zip"
+    G = load_gtfs_as_graph(gtfs_path)
+    nx.write_gpickle(G, "../data/dublin_bus_graph.gpickle")
+    return G
+
+if __name__ == "__main__":
+    build_dublin_bus_graph()
+
+
 def build_dublin_bus_graph(gtfs_path="../data/gtfs_dublin.zip"):
     """
     Build a graph of the Dublin Bus GTFS static feed using city2graph.gtfs.
@@ -22,3 +35,4 @@ def build_dublin_bus_graph(gtfs_path="../data/gtfs_dublin.zip"):
 
 if __name__ == "__main__":
     build_dublin_bus_graph()
+
