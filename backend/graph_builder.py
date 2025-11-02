@@ -1,22 +1,24 @@
-import city2graph as c2g
-import networkx as nx
 import os
+import city2graph.gtfs as gtfs
+import networkx as nx
 
 def build_dublin_bus_graph(gtfs_path="../data/gtfs_dublin.zip"):
     """
-    Build a city-scale graph from the Dublin Bus GTFS static feed.
-    Converts stops, routes, and trips into a graph usable for analysis.
+    Build a graph of the Dublin Bus GTFS static feed using city2graph.gtfs.
     """
     if not os.path.exists(gtfs_path):
         raise FileNotFoundError(f"GTFS file not found: {gtfs_path}")
 
-    # Load GTFS feed as graph (city2graph auto-detects stops/routes/trips)
-    g = c2g.load_gtfs_as_graph(gtfs_path)
+    print("📦 Loading GTFS feed, please wait...")
 
-    print(f"✅ Graph built successfully — {g.number_of_nodes()} stops, {g.number_of_edges()} edges")
-    
-    nx.write_gpickle(g, "../data/dublin_bus_graph.gpickle")
-    return g
+    # Load GTFS feed and build the stop graph
+    feed = gtfs.GTFS(gtfs_path)
+    G = feed.to_graph(stop_level=True)   # stop_level=True builds stop-based graph
+
+    print(f"✅ Graph built successfully — {G.number_of_nodes()} stops, {G.number_of_edges()} edges")
+
+    nx.write_gpickle(G, "../data/dublin_bus_graph.gpickle")
+    return G
 
 if __name__ == "__main__":
     build_dublin_bus_graph()
