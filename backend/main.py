@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from data_fetcher import fetch_gtfs, fetch_weather
+from data_fetcher import fetch_gtfs
 
 app = FastAPI(title="SmartBus Dublin")
 

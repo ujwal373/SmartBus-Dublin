@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh  # ✅ install with: pip install streamlit-autorefresh
+from streamlit_autorefresh import st_autorefresh 
 import requests
 import folium
 from streamlit_folium import st_folium
