@@ -1,14 +1,14 @@
 import os
-import city2graph.gtfs as gtfs
-import networkx as nx
-
 from gtfs_loader import load_gtfs_as_graph
 import networkx as nx
 
 def build_dublin_bus_graph():
-    gtfs_path = "../data/gtfs_dublin.zip"
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    gtfs_path = os.path.join(data_dir, "gtfs_dublin.zip")
+
     G = load_gtfs_as_graph(gtfs_path)
-    nx.write_gpickle(G, "../data/dublin_bus_graph.gpickle")
+    nx.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
+    print("✅ Graph built successfully and saved!")
     return G
 
 if __name__ == "__main__":
