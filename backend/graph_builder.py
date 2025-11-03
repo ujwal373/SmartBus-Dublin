@@ -7,7 +7,9 @@ def build_dublin_bus_graph():
     gtfs_path = os.path.join(data_dir, "gtfs_dublin.zip")
 
     G = load_gtfs_as_graph(gtfs_path)
-    nx.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
+    from networkx.readwrite import gpickle
+    gpickle.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
+
     print("✅ Graph built successfully and saved!")
     return G
 
