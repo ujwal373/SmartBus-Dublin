@@ -1,20 +1,22 @@
-import os
 from gtfs_loader import load_gtfs_as_graph
 import networkx as nx
+from networkx.readwrite import gpickle
+import os
 
 def build_dublin_bus_graph():
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     gtfs_path = os.path.join(data_dir, "gtfs_dublin.zip")
 
     G = load_gtfs_as_graph(gtfs_path)
-    from networkx.readwrite import gpickle
-    gpickle.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
+    print(f"✅ Built graph with {G.number_of_nodes()} stops and {G.number_of_edges()} edges.")
 
+    gpickle.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
     print("✅ Graph built successfully and saved!")
     return G
 
 if __name__ == "__main__":
     build_dublin_bus_graph()
+
 
 
 def build_dublin_bus_graph(gtfs_path="../data/gtfs_dublin.zip"):
