@@ -35,4 +35,3 @@ def build_dublin_bus_graph(gtfs_path="../data/gtfs_dublin.zip"):
 
 if __name__ == "__main__":
     build_dublin_bus_graph()
-
