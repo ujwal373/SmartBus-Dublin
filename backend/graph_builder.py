@@ -1,7 +1,7 @@
 import os
 import networkx as nx
-from networkx.readwrite import gpickle
 from gtfs_loader import load_gtfs_as_graph
+import pickle
 
 
 def build_dublin_bus_graph():
@@ -20,8 +20,11 @@ def build_dublin_bus_graph():
     G = load_gtfs_as_graph(gtfs_path)
     print(f"✅ Built graph with {G.number_of_nodes()} stops and {G.number_of_edges()} edges.")
 
-    gpickle.write_gpickle(G, os.path.join(data_dir, "dublin_bus_graph.gpickle"))
-    print("✅ Graph saved to data/dublin_bus_graph.gpickle")
+    # Save safely using Python's pickle (same format NetworkX uses)
+    out_path = os.path.join(data_dir, "dublin_bus_graph.gpickle")
+    with open(out_path, "wb") as f:
+        pickle.dump(G, f)
+    print(f"✅ Graph saved to {out_path}")
 
     return G
 
