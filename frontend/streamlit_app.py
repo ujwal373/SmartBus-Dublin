@@ -1,16 +1,15 @@
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh 
+from streamlit_autorefresh import st_autorefresh
 import requests
 import folium
 from streamlit_folium import st_folium
 import sys, os, time
+import pickle
+import networkx as nx
 
 # Import the delay analyzer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend")))
 from delay_analyzer import detect_delays
-
-import pickle
-import networkx as nx
 
 # --- Load static Dublin Bus graph ---
 graph_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "dublin_bus_graph.gpickle"))
@@ -22,8 +21,7 @@ if os.path.exists(graph_path):
 else:
     st.warning("⚠️ Graph not found. Please run graph_builder.py first.")
 
-
-# ---- Streamlit page setup ----
+# ---- Streamlit setup ----
 st.set_page_config(page_title="SmartBus Dublin", page_icon="🚍", layout="wide")
 st.title("🚍 SmartBus Dublin – Live Map")
 st.caption("AI-assisted monitoring for a self-healing Dublin bus network")
@@ -54,6 +52,22 @@ st.markdown(
 # ---- Base Map ----
 m = folium.Map(location=[53.3498, -6.2603], zoom_start=12, tiles="CartoDB positron")
 
+# --- Draw static GTFS network (gray lines) ---
+if G:
+    for u, v in list(G.edges())[:2000]:  # Limit to first 2000 edges for performance
+        try:
+            u_lat, u_lon = G.nodes[u]["lat"], G.nodes[u]["lon"]
+            v_lat, v_lon = G.nodes[v]["lat"], G.nodes[v]["lon"]
+            folium.PolyLine(
+                locations=[[u_lat, u_lon], [v_lat, v_lon]],
+                color="gray",
+                weight=1,
+                opacity=0.4
+            ).add_to(m)
+        except KeyError:
+            continue
+
+# --- Add Live Bus Markers ---
 if "entity" in data and count > 0:
     for ent in data["entity"]:
         pos = ent["position"]
@@ -61,23 +75,24 @@ if "entity" in data and count > 0:
         lat, lon = pos["latitude"], pos["longitude"]
         route_id = trip.get("route_id", "Unknown")
 
-        # ✅ Colour logic
-        color = "blue" if route_id.startswith("4820") else "gray"
+        # Determine color based on delay
+        color = "blue"
+        if not df.empty and ent["id"] in df["vehicle_id"].values:
+            color = "red"
 
         folium.CircleMarker(
             location=[lat, lon],
-            radius=4,
+            radius=5,
             color=color,
             fill=True,
-            fill_opacity=0.7,
+            fill_opacity=0.8,
             popup=f"Route: {route_id}"
         ).add_to(m)
-
 else:
     st.warning("No live vehicles available right now.")
 
-# ---- Render map ----
-st_data = st_folium(m, width=750, height=500)
+# ---- Render Map ----
+st_data = st_folium(m, width=800, height=550)
 
 # ---- Delay Table ----
 st.subheader("🚦 Delay Detection Snapshot")
@@ -85,4 +100,3 @@ if not df.empty:
     st.dataframe(df)
 else:
     st.info("No delays detected yet — monitoring in progress...")
-
