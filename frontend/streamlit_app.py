@@ -9,6 +9,20 @@ import sys, os, time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend")))
 from delay_analyzer import detect_delays
 
+import pickle
+import networkx as nx
+
+# --- Load static Dublin Bus graph ---
+graph_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "dublin_bus_graph.gpickle"))
+G = None
+if os.path.exists(graph_path):
+    with open(graph_path, "rb") as f:
+        G = pickle.load(f)
+    st.success(f"🗺️ Loaded Dublin Bus graph with {G.number_of_nodes()} stops and {G.number_of_edges()} routes.")
+else:
+    st.warning("⚠️ Graph not found. Please run graph_builder.py first.")
+
+
 # ---- Streamlit page setup ----
 st.set_page_config(page_title="SmartBus Dublin", page_icon="🚍", layout="wide")
 st.title("🚍 SmartBus Dublin – Live Map")
@@ -71,3 +85,4 @@ if not df.empty:
     st.dataframe(df)
 else:
     st.info("No delays detected yet — monitoring in progress...")
+
