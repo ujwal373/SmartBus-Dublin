@@ -30,7 +30,10 @@ st.caption("AI-assisted monitoring for a self-healing Dublin bus network")
 st.sidebar.title("📊 Network Overview")
 
 # Auto-refresh every 60 seconds
-st_autorefresh(interval=60000, key="refresh")
+if "last_refresh" not in st.session_state or time.time() - st.session_state["last_refresh"] > 60:
+    st.session_state["last_refresh"] = time.time()
+    st.experimental_rerun()
+
 
 # ---- Fetch live GTFS data ----
 try:
