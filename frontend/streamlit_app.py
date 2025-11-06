@@ -105,9 +105,19 @@ st_data = st_folium(m, width=900, height=550)
 # ---- Delay Table ----
 st.subheader("🚦 Delay Detection Snapshot")
 if not df.empty:
-    st.dataframe(df.style.apply(
-        lambda x: ["background-color: #ffcccc" if v == "delayed" else
-                   "background-color: #fff3cd" if v == "slow" else
-                   "" for v in x["status"]], axis=1))
+    def highlight_status(row):
+    color = ""
+    if row["status"] == "delayed":
+        color = "background-color: #ffcccc"
+    elif row["status"] == "slow":
+        color = "background-color: #fff3cd"
+    elif row["status"] == "normal":
+        color = "background-color: #d4edda"
+    else:
+        color = ""
+    return [color] * len(row)
+
+st.dataframe(df.style.apply(highlight_status, axis=1))
+
 else:
     st.info("No delays detected yet — monitoring in progress...")
