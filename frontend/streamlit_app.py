@@ -30,9 +30,22 @@ st.caption("AI-assisted monitoring for a self-healing Dublin bus network")
 st.sidebar.title("📊 Network Overview")
 
 # Auto-refresh every 60 seconds
-if "last_refresh" not in st.session_state or time.time() - st.session_state["last_refresh"] > 60:
-    st.session_state["last_refresh"] = time.time()
-    st.experimental_rerun()
+# ---- Smart refresh toggle ----
+refresh_toggle = st.sidebar.checkbox("🔄 Auto-refresh every 60s", value=True)
+
+if refresh_toggle:
+    # initialize timestamp
+    if "last_refresh" not in st.session_state:
+        st.session_state["last_refresh"] = time.time()
+
+    # check if 60 seconds passed since last refresh
+    elapsed = time.time() - st.session_state["last_refresh"]
+    if elapsed > 60:
+        st.session_state["last_refresh"] = time.time()
+        st.experimental_rerun()
+else:
+    st.sidebar.caption("⏸️ Auto-refresh paused. Use manual refresh from Streamlit UI.")
+
 
 
 # ---- Fetch live GTFS data ----
